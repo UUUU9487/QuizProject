@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block content %}
+<div style="max-width: 600px; margin: 40px auto; text-align: center; background: #fff; padding: 50px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.05);">
+    <h1 style="font-size: 28px; color: #111; margin-bottom: 10px;">測驗完成！</h1>
+    <p style="color: #666; margin-bottom: 30px;">本次測驗成績已存入歷史紀錄</p>
+    
+    <div style="font-size: 80px; font-weight: 900; color: {% if score >= 60 %}#198754{% else %}#dc3545{% endif %}; line-height: 1; margin-bottom: 40px;">
+        {{ score }} 分
+    </div>
+    
+    {% if has_mistakes %}
+        <div style="background-color: #fdfaf6; border: 1px solid #f39c12; padding: 20px; border-radius: 16px; margin-bottom: 30px;">
+            <h3 style="margin: 0 0 10px 0; color: #d35400;">您有 {{ mistakes_count }} 題答錯</h3>
+            <p style="margin: 0; color: #666; font-size: 14px; margin-bottom: 15px;">要現在立刻針對錯題進行補考嗎？</p>
+            <a href="/retry/" class="btn" style="background-color: #d35400; color: #fff; width: 100%; box-sizing: border-box;">馬上補考錯題 ➔</a>
+        </div>
+    {% else %}
+        <div style="background-color: #d1e7dd; color: #0f5132; padding: 20px; border-radius: 16px; margin-bottom: 30px;">
+            <h3 style="margin: 0;">🎉 太神啦！全對滿分！</h3>
+        </div>
+    {% endif %}
+
+    <div style="display: flex; gap: 15px; justify-content: center;">
+        <a href="/" class="btn" style="background-color: #f0f0f0; color: #333;">回首頁</a>
+        <a href="/history/" class="btn">查看歷史成績</a>
+    </div>
+</div>
+{% endblock %}

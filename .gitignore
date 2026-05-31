@@ -1,0 +1,18 @@
+# Python 系統自動生成的暫存檔 (不需要上傳)
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# 你的虛擬環境資料夾 (超級大，絕對不要上傳)
+venv/
+env/
+
+# Django 開發用的本地 SQLite 資料庫 (避免組員互相覆蓋資料)
+db.sqlite3
+
+# 如果之後有用到環境變數或密碼檔 (保護隱私)
+.env
+
+# VS Code 編輯器的設定檔
+.vscode/

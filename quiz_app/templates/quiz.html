@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+{% block content %}
+<style>
+    .quiz-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 15px; margin-bottom: 25px; }
+    .timer-badge { background-color: #ffebee; color: #c62828; padding: 8px 15px; border-radius: 20px; font-weight: bold; font-family: monospace; font-size: 16px; border: 1px solid #ffcdd2;}
+    .choices-wrapper { counter-reset: option-counter; }
+    .choice-container { margin-bottom: 15px; }
+    .choice-container input[type="radio"] { display: none; }
+    .choice-label { display: block; background: #fdfaf6; border: 2px solid #eee; padding: 15px 20px; border-radius: 12px; cursor: pointer; transition: all 0.2s; font-size: 16px; color: #333; }
+    .choice-label::before { counter-increment: option-counter; content: counter(option-counter, upper-alpha) ". "; font-weight: bold; color: #111; margin-right: 10px; }
+    .choice-label:hover { border-color: #111; background: #f9f9f9; }
+    .choice-container input[type="radio"]:checked + .choice-label { border-color: #111; background: #111; color: #fff; }
+    .choice-container input[type="radio"]:checked + .choice-label::before { color: #fff; }
+    
+    /* 🔥 完美修復：強制靠左、保留縮排、設定程式碼字體 */
+    .question-text {
+        text-align: left;
+        font-family: 'Consolas', 'Courier New', monospace;
+        line-height: 1.6; 
+        font-size: 17px; 
+        margin-bottom: 25px; 
+        white-space: pre-wrap; 
+        background-color: #f1f3f5; /* 淺灰底色，更像程式碼區塊 */
+        padding: 20px;
+        border-radius: 12px;
+        border: 1px solid #e9ecef;
+    }
+</style>
+
+<div class="quiz-header">
+    <span style="font-weight: bold; color: #666; font-size: 18px;">📝 第 {{ current_q_num }} 題</span>
+    {% if request.session.quiz_mode == 'exam' %}
+        <span class="timer-badge" id="timer">⏱️ 計算中...</span>
+    {% endif %}
+</div>
+
+{% if show_result %}
+    <div class="question-text">{{ question.text }}</div>
+    
+    {% if is_correct %}
+        <div style="background-color: #d1e7dd; color: #0f5132; padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+            <h3 style="margin: 0;">✅ 答對了！</h3>
+        </div>
+    {% else %}
+        <div style="background-color: #f8d7da; color: #842029; padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+            <h3 style="margin: 0 0 10px 0;">❌ 答錯了！</h3>
+            <p style="margin: 0;">正確答案是：<strong style="font-size: 18px;">{{ correct.text }}</strong></p>
+        </div>
+        {% if request.session.quiz_mode == 'practice' %}
+            <p style="font-size: 14px; color: #888; text-align: center;">(練習模式：這題已自動記錄，稍後將再次出現讓您補考)</p>
+        {% endif %}
+    {% endif %}
+    
+    {% if question.explanation %}
+        <div style="background-color: #fdfaf6; border-left: 5px solid #f39c12; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+            <h4 style="margin: 0 0 10px 0; color: #d35400;">💡 解析與說明</h4>
+            <p style="margin: 0; color: #555; line-height: 1.6; font-size: 15px; white-space: pre-wrap; text-align: left;">{{ question.explanation }}</p>
+        </div>
+    {% endif %}
+    
+    <br><a href="/quiz/" class="btn" style="width: 100%; box-sizing: border-box;">下一題 ➔</a>
+
+{% else %}
+    <div class="question-text">{{ question.text }}</div>
+    
+    <form method="post" id="quizForm">
+        {% csrf_token %}
+        <input type="hidden" name="question_id" value="{{ question.id }}">
+        <div class="choices-wrapper">
+            {% for choice in choices %}
+                <div class="choice-container">
+                    <input type="radio" id="choice_{{ choice.id }}" name="choice" value="{{ choice.id }}">
+                    <label class="choice-label" for="choice_{{ choice.id }}">{{ choice.text }}</label>
+                </div>
+            {% endfor %}
+        </div>
+        <br><button type="submit" class="btn" style="width: 100%;">送出答案</button>
+    </form>
+{% endif %}
+
+<script>
+    // 跨題全域倒數計時器
+    {% if request.session.quiz_mode == 'exam' %}
+        let timeLeft = {{ time_left }}; // 從後端接手剩餘秒數
+        const timerDisplay = document.getElementById('timer');
+        const quizForm = document.getElementById('quizForm');
+        
+        const timer = setInterval(() => {
+            if (timeLeft <= 0) {
+                clearInterval(timer);
+                timerDisplay.innerText = "⏱️ 00:00";
+                alert("考試時間到！系統即將自動交卷。");
+                if (quizForm && !{{ show_result|yesno:"true,false" }}) {
+                    quizForm.submit(); // 自動交卷
+                } else {
+                    window.location.href = "/result/";
+                }
+                return;
+            }
+            
+            timeLeft--;
+            let m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+            let s = (timeLeft % 60).toString().padStart(2, '0');
+            timerDisplay.innerText = `⏱️ ${m}:${s}`;
+        }, 1000);
+    {% endif %}
+
+    // 鍵盤快捷鍵
+    document.addEventListener('keydown', function(event) {
+        const key = event.key.toLowerCase();
+        {% if not show_result %}
+            const keyMap = { '1': 0, '2': 1, '3': 2, '4': 3, '5': 4, 'a': 0, 'b': 1, 'c': 2, 'd': 3, 'e': 4 };
+            if (key in keyMap) {
+                const radios = document.querySelectorAll('input[type="radio"]');
+                const index = keyMap[key];
+                if (radios[index]) {
+                    radios[index].checked = true;
+                    document.querySelectorAll('.choice-label').forEach(lbl => {
+                        lbl.style.background = '#fdfaf6'; lbl.style.color = '#333';
+                    });
+                    radios[index].nextElementSibling.style.background = '#111';
+                    radios[index].nextElementSibling.style.color = '#fff';
+                }
+            }
+        {% endif %}
+    });
+</script>
+{% endblock %}

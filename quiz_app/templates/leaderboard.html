@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div style="margin-bottom: 40px;">
+    <h1 style="color: #111; font-size: 32px; margin: 10px 0;">排行榜</h1>
+    <p style="color: #666;">第 5 章「鏈結串列」 | 依分數降冪，分數相同時用時較短者優先。</p>
+</div>
+
+<div style="border-radius: 16px; background-color: #fff; overflow: hidden; border: 1px solid #eee;">
+    <table style="width: 100%; border-collapse: collapse; text-align: left;">
+        <tr style="background-color: #f7f7f7; color: #555; font-size: 14px; border-bottom: 1px solid #eee;">
+            <th style="padding: 15px 20px; width: 60px;">排名</th>
+            <th style="padding: 15px 20px;">玩家</th>
+            <th style="padding: 15px 20px;">分數</th>
+            <th style="padding: 15px 20px;">用時</th>
+            <th style="padding: 15px 20px;">日期</th>
+        </tr>
+        {% for r in records %}
+        <tr style="border-bottom: 1px solid #eee;">
+            <td style="padding: 15px 20px;">
+                {% if forloop.counter <= 3 %}
+                    <span style="background-color: #ffd700; color: #000; padding: 4px 10px; border-radius: 12px; font-weight: bold; font-size: 13px;">{{ forloop.counter }}</span>
+                {% else %}
+                    <span style="color: #888; font-size: 15px;">#{{ forloop.counter }}</span>
+                {% endif %}
+            </td>
+            <td style="padding: 15px 20px; color: #111; font-weight: bold;">{{ r.user.username }}</td>
+            <td style="padding: 15px 20px; font-weight: bold; color: {% if r.score >= 60 %}#198754{% else %}#dc3545{% endif %};">{{ r.score }} / 100</td>
+            <td style="padding: 15px 20px; color: #666;">{{ r.time_spent }} 秒</td>
+            <td style="padding: 15px 20px; color: #666;">{{ r.created_at|date:"Y/m/d" }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+{% endblock %}

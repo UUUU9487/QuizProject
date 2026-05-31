@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block content %}
+<div style="margin-bottom: 40px; text-align: center;">
+    <h1 style="color: #111; font-size: 32px; margin: 10px 0;">歷史成績</h1>
+    <p style="color: #666;">{{ user.username }} 的作答紀錄，每次結果永久保存於資料庫。</p>
+</div>
+
+{% if attempts %}
+    <div style="border-radius: 16px; background-color: #fff; overflow: hidden; border: 1px solid #eee;">
+        <table style="width: 100%; border-collapse: collapse; text-align: center;">
+            <tr style="background-color: #f7f7f7; color: #555; font-size: 14px; border-bottom: 1px solid #eee;">
+                <th style="padding: 15px; text-align: center;">測驗時間</th>
+                <th style="padding: 15px; text-align: center;">分數</th>
+                <th style="padding: 15px; text-align: center;">耗時</th>
+                <th style="padding: 15px; text-align: center;">操作</th>
+            </tr>
+            {% for attempt in attempts %}
+            <tr style="border-bottom: 1px solid #eee;">
+                <td style="padding: 15px; color: #333;">{{ attempt.created_at|date:"Y/m/d H:i" }}</td>
+                <td style="padding: 15px; font-weight: bold; color: {% if attempt.score >= 60 %}#198754{% else %}#dc3545{% endif %};">{{ attempt.score }} / 100</td>
+                <td style="padding: 15px; color: #666;">{{ attempt.time_spent }} 秒</td>
+                <td style="padding: 15px;">
+                    <a href="/history/{{ attempt.id }}/" style="background-color: #111; color: #fff; padding: 6px 15px; border-radius: 20px; text-decoration: none; font-size: 13px;">查看明細</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+{% else %}
+    <div style="text-align: center; padding: 60px 0;">
+        <p style="color: #888; margin-bottom: 20px;">目前尚無歷史紀錄。</p>
+        <a href="/" class="btn">開始第一次測驗 ➔</a>
+    </div>
+{% endif %}
+{% endblock %}

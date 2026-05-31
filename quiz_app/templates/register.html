@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div style="max-width: 400px; margin: 0 auto; padding: 20px;">
+    <h2 style="text-align: center; border-bottom: 2px solid #0056b3; padding-bottom: 10px;">註冊新帳號</h2>
+    
+    <form method="post" style="margin-top: 20px;">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn" style="width: 100%; margin-top: 10px;">註冊</button>
+    </form>
+    
+    <p style="text-align: center; margin-top: 20px; font-size: 14px;">
+        已有帳號？ <a href="/login/" style="color: #0056b3;">點此登入</a>
+    </p>
+</div>
+{% endblock %}
