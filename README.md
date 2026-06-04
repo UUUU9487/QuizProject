@@ -16,7 +16,19 @@
 
 請依序在終端機執行以下指令，即可在本機端啟動系統：
 
-**1. 複製專案到本機**
+**1. 複製專案到本機並進入資料夾**
 ```bash
 git clone <你的GitHub儲存庫網址>
 cd QuizProject
+#2. 建立並啟動虛擬環境
+python -m venv venv
+.\venv\Scripts\activate
+#3. 安裝系統所需套件
+pip install -r requirements.txt
+#4. 初始化資料庫結構
+python manage.py migrate
+#5. 匯入預設題庫 (包含 11 題基礎題與 5 題原創題
+python import_data.py
+#6. 啟動本地伺服器
+python manage.py runserver
+#7啟動後，請在瀏覽器輸入 http://127.0.0.1:8000/ 即可開始測驗！
