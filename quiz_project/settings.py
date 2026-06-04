@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-p6zme(5&ayx!x%0w*03)+10w!ce(u($r$5@$w1(g56v(hsvtft
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -116,3 +116,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+# 信任 Ngrok 的網域，避免 CSRF 驗證失敗
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.ngrok-free.dev',
+    'https://*.ngrok-free.app',
+]

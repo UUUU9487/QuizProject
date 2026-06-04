@@ -42,8 +42,15 @@ def logout_view(request):
 def home_view(request):
     if request.method == 'POST':
         num_questions = int(request.POST.get('num_questions', 5))
-        mode = request.POST.get('quiz_mode', 'practice')
+        mode = request.POST.get('quiz_mode', 'normal')
         
+        # 🔥 【加上這兩行終極防呆】
+        # 如果從首頁傳來了 practice，我們直接強制把它轉回 normal！
+        if mode == 'practice':
+            mode = 'normal'
+            
+        all_ids = list(Question.objects.values_list('id', flat=True))
+        # ... 下面維持你原本的程式碼 ...
         all_ids = list(Question.objects.values_list('id', flat=True))
         if not all_ids:
             return render(request, 'start.html', {'error': '題庫目前沒有題目喔！請先至後台新增。'})
@@ -129,19 +136,31 @@ def result_view(request):
     final_score = int((score_count / target_num) * 100) if target_num > 0 else 0
     mistakes = request.session.get('mistakes', [])
     
+    current_mode = request.session.get('quiz_mode', 'normal') 
+    
+    # 👉 就是少了這一行！告訴 Python 什麼是 is_practice
+    is_practice = (current_mode == 'practice')
+    
     if not request.session.get('saved_attempt', False):
-        time_spent = int(time.time() - request.session.get('start_time', time.time()))
-        attempt = QuizAttempt.objects.create(
-            user=request.user, score=final_score, total_questions=target_num, time_spent=time_spent
-        )
-        user_answers = request.session.get('user_answers', [])
-        for ans in user_answers:
-            UserAnswer.objects.create(
-                attempt=attempt, question_id=ans['q_id'], selected_choice_id=ans['c_id'], is_correct=ans['is_correct']
+        if current_mode != 'practice':
+            time_spent = int(time.time() - request.session.get('start_time', time.time()))
+            attempt = QuizAttempt.objects.create(
+                user=request.user, score=final_score, total_questions=target_num, time_spent=time_spent
             )
+            user_answers = request.session.get('user_answers', [])
+            for ans in user_answers:
+                UserAnswer.objects.create(
+                    attempt=attempt, question_id=ans['q_id'], selected_choice_id=ans['c_id'], is_correct=ans['is_correct']
+                )
         request.session['saved_attempt'] = True
 
-    return render(request, 'result.html', {'score': final_score, 'mistakes_count': len(mistakes), 'has_mistakes': len(mistakes) > 0})
+    # 這裡才能順利把 is_practice 傳出去
+    return render(request, 'result.html', {
+        'score': final_score, 
+        'mistakes_count': len(mistakes), 
+        'has_mistakes': len(mistakes) > 0, 
+        'is_practice': is_practice
+    })
 
 @login_required(login_url='/login/')
 def retry_mistakes_view(request):
