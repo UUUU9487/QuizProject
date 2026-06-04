@@ -41,3 +41,5 @@ python import_data.py
 python manage.py runserver
 
 #啟動後，請在瀏覽器輸入 http://127.0.0.1:8000/ 即可開始測驗！
+# 管理員帳號 wilso
+# 管理員密碼 admin1234
